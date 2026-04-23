@@ -1,0 +1,6 @@
+{
+  "name": "guardian-ai",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "agent", "packages/*"]
+}
