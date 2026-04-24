@@ -1,15 +1,18 @@
 const { guardianAgent } = require('@guardian/agent');
-const { CODES, getInterpolatedMeta, isSuccessCode } = require('../utils/codes');
+const { CODES, CODE_META } = require('../utils/codes');
 
 /**
  * analyzeLinkService — orchestrates piracy scanning for a given link.
- * Returns { ok, code, message, data, _replacements }.
  */
 const analyzeLinkService = async (body) => {
   if (!body.link) {
-    const r = { field: "link" };
-    const meta = getInterpolatedMeta(CODES.LINK_REQUIRED, r);
-    return { ok: false, code: CODES.LINK_REQUIRED, message: meta.internalMessage, data: [], _replacements: r };
+    const { internalMessage } = CODE_META[CODES.LINK_REQUIRED];
+    return {
+      ok: false,
+      code: CODES.LINK_REQUIRED,
+      message: internalMessage.replace("{{field}}", "link"),
+      data: [],
+    };
   }
 
   try {
@@ -18,20 +21,34 @@ const analyzeLinkService = async (body) => {
     const report = result.report;
 
     if (!report) {
-      const meta = getInterpolatedMeta(CODES.REPORT_EMPTY);
-      return { ok: false, code: CODES.REPORT_EMPTY, message: meta.internalMessage, data: [] };
+      const { internalMessage } = CODE_META[CODES.REPORT_EMPTY];
+      return {
+        ok: false,
+        code: CODES.REPORT_EMPTY,
+        message: internalMessage,
+        data: [],
+      };
     }
 
     console.log(`[ScanService] Done — pirated: ${report?.piracy?.isPirated}`);
 
-    const r = { resource: "Scan report" };
-    const meta = getInterpolatedMeta(CODES.SUCCESS, r);
-    return { ok: true, code: CODES.SUCCESS, message: meta.internalMessage, data: report, _replacements: r };
+    const { internalMessage } = CODE_META[CODES.SUCCESS];
+    return {
+      ok: true,
+      code: CODES.SUCCESS,
+      message: internalMessage.replace("{{resource}}", "Scan report"),
+      data: report,
+    };
   } catch (err) {
     console.error("[ScanService] Error:", err);
 
-    const meta = getInterpolatedMeta(CODES.SCAN_FAILED);
-    return { ok: false, code: CODES.SCAN_FAILED, message: meta.internalMessage, data: [] };
+    const { internalMessage } = CODE_META[CODES.SCAN_FAILED];
+    return {
+      ok: false,
+      code: CODES.SCAN_FAILED,
+      message: internalMessage,
+      data: [],
+    };
   }
 };
 

@@ -1,20 +1,19 @@
 /**
  * codes.js — Single source of truth for all internal result codes.
  *
- * Every code maps to:
- *   httpStatus      → HTTP status the controller should send
- *   publicMessage   → Safe, user-facing message (goes to frontend)
- *                     Supports {{placeholder}} tokens for dynamic context
- *   internalMessage → Detailed reason kept in logs only (NEVER sent to client)
- *                     Also supports {{placeholder}} tokens
+ * CODES       → enum of internal code strings
+ * CODE_META   → maps each code to { httpStatus, publicMessage, internalMessage }
  *
- * Usage in services:
- *   const { CODES } = require('../utils/codes');
- *   serviceResult(CODES.CREATED, user, { resource: "User" });
- *   // publicMessage → "User created successfully"
+ * Messages use {{placeholder}} tokens where context is needed.
+ * Replace them with a simple .replace("{{resource}}", "City") in your service/controller.
  *
- * Usage in controllers:
- *   sendResponse(res, result);   // interpolation happens automatically
+ * Available placeholders:
+ *   {{resource}} — entity name    e.g. "User", "Scan Report", "City"
+ *   {{field}}    — field name     e.g. "email", "link", "password"
+ *   {{reason}}   — extra context  e.g. "email already taken"
+ *   {{action}}   — action name    e.g. "delete users", "view reports"
+ *   {{service}}  — service name   e.g. "Guardian Agent", "Payment Gateway"
+ *   {{limit}}    — numeric limit  e.g. "10MB", "100 requests/min"
  */
 
 // ─── Internal Code Enum ──────────────────────────────────────────────────────
@@ -64,16 +63,6 @@ const CODES = Object.freeze({
 
 
 // ─── Code → Metadata Map ────────────────────────────────────────────────────
-// httpStatus:      what the controller sends
-// publicMessage:   safe string shown to the frontend (supports {{placeholders}})
-// internalMessage: detailed reason for backend logs only  (supports {{placeholders}})
-//
-// Available placeholders (use only where marked):
-//   {{resource}} — entity name    e.g. "User", "Scan Report", "City"
-//   {{field}}    — field name     e.g. "email", "link", "password"
-//   {{reason}}   — extra context  e.g. "email already taken"
-//   {{service}}  — service name   e.g. "Guardian Agent", "Payment Gateway"
-//   {{limit}}    — numeric limit  e.g. "10MB", "100 requests/min"
 const CODE_META = Object.freeze({
 
   // ── Success ────────────────────────────────────────────────────────────────
@@ -239,62 +228,4 @@ const CODE_META = Object.freeze({
   },
 });
 
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/**
- * interpolate — replace {{placeholder}} tokens in a template string.
- *
- * @param {string} template          e.g. "{{resource}} created successfully"
- * @param {Record<string, string>} replacements  e.g. { resource: "User" }
- * @returns {string}                 e.g. "User created successfully"
- *
- * Unreplaced placeholders are stripped to keep messages clean.
- */
-const interpolate = (template, replacements = {}) => {
-  return template
-    .replace(/\{\{(\w+)\}\}/g, (_, key) => replacements[key] ?? "")
-    .replace(/\s{2,}/g, " ")   // collapse double spaces from stripped tokens
-    .trim();
-};
-
-/**
- * getCodeMeta — look up the metadata for a given internal code.
- * Falls back to INTERNAL_ERROR if the code is unrecognised.
- */
-const getCodeMeta = (code) => {
-  return CODE_META[code] || CODE_META[CODES.INTERNAL_ERROR];
-};
-
-/**
- * getInterpolatedMeta — look up metadata and interpolate placeholders.
- *
- * @param {string} code
- * @param {Record<string, string>} replacements  e.g. { resource: "City" }
- * @returns {{ httpStatus: number, publicMessage: string, internalMessage: string }}
- */
-const getInterpolatedMeta = (code, replacements = {}) => {
-  const meta = getCodeMeta(code);
-  return {
-    httpStatus: meta.httpStatus,
-    publicMessage: interpolate(meta.publicMessage, replacements),
-    internalMessage: interpolate(meta.internalMessage, replacements),
-  };
-};
-
-/**
- * isSuccessCode — returns true if the code represents a success outcome.
- */
-const isSuccessCode = (code) => {
-  const meta = getCodeMeta(code);
-  return meta.httpStatus >= 200 && meta.httpStatus < 300;
-};
-
-module.exports = {
-  CODES,
-  CODE_META,
-  getCodeMeta,
-  getInterpolatedMeta,
-  interpolate,
-  isSuccessCode,
-};
+module.exports = { CODES, CODE_META };

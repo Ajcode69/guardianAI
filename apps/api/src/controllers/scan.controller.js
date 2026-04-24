@@ -1,27 +1,26 @@
 const { analyzeLinkService } = require('../services/scan.service.js');
-const { CODES, getInterpolatedMeta } = require('../utils/codes');
+const { CODES, CODE_META } = require('../utils/codes');
 
 /**
  * handleScanController — handles piracy scan requests.
- * Reads the service result and builds the HTTP response inline.
  */
 const handleScanController = async (req, res) => {
   try {
     const result = await analyzeLinkService(req.body);
-    const meta = getInterpolatedMeta(result.code, result._replacements || {});
+    const { httpStatus, publicMessage } = CODE_META[result.code] || CODE_META[CODES.INTERNAL_ERROR];
 
-    return res.status(meta.httpStatus).json({
+    return res.status(httpStatus).json({
       success: result.ok,
-      message: meta.publicMessage,
+      message: publicMessage.replace("{{field}}", "link").replace("{{resource}}", "Scan report"),
       data: result.data,
     });
   } catch (err) {
     console.error("[ScanController] Unhandled:", err);
 
-    const meta = getInterpolatedMeta(CODES.INTERNAL_ERROR);
-    return res.status(meta.httpStatus).json({
+    const { httpStatus, publicMessage } = CODE_META[CODES.INTERNAL_ERROR];
+    return res.status(httpStatus).json({
       success: false,
-      message: meta.publicMessage,
+      message: publicMessage,
       data: [],
     });
   }
