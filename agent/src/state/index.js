@@ -21,6 +21,10 @@ export const AgentState = Annotation.Root({
   ownerConfidence: Annotation({ reducer: (_, b) => b, default: () => 0 }),
   originalSources: Annotation({ reducer: (_, b) => b, default: () => [] }),
 
+  // Matcher outputs
+  matchResults: Annotation({ reducer: (_, b) => b, default: () => [] }),
+  hasVideoMatch: Annotation({ reducer: (_, b) => b, default: () => false }),
+
   // Analyzer outputs
   isPirated: Annotation({ reducer: (_, b) => b, default: () => false }),
   piracyScore: Annotation({ reducer: (_, b) => b, default: () => 0 }),

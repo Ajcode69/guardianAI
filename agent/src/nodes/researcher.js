@@ -9,12 +9,15 @@ import { RESEARCHER_PROMPT } from '../prompts/index.js';
  */
 export async function researcher(state) {
   const queries = state.searchKeywords.slice(0, 3);
-  const allResults = [];
 
-  for (const query of queries) {
-    const results = await searchWeb(query, 5);
-    allResults.push(...(results || []));
-  }
+  // Run up to 3 searches in parallel
+  const settled = await Promise.allSettled(
+    queries.map(q => searchWeb(q, 5))
+  );
+
+  const allResults = settled.flatMap(r =>
+    r.status === 'fulfilled' ? (r.value || []) : []
+  );
 
   // Deduplicate by URL
   const seen = new Set();

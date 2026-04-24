@@ -2,6 +2,7 @@ import { StateGraph, START, END } from '@langchain/langgraph';
 import { AgentState } from '../state/index.js';
 import { traverser } from '../nodes/traverser.js';
 import { researcher } from '../nodes/researcher.js';
+import { matcher } from '../nodes/matcher.js';
 import { analyzer } from '../nodes/analyzer.js';
 import { reporter } from '../nodes/reporter.js';
 
@@ -17,11 +18,13 @@ import { reporter } from '../nodes/reporter.js';
 const workflow = new StateGraph(AgentState)
   .addNode('traverser', traverser)
   .addNode('researcher', researcher)
+  .addNode('matcher', matcher)
   .addNode('analyzer', analyzer)
   .addNode('reporter', reporter)
   .addEdge(START, 'traverser')
   .addEdge('traverser', 'researcher')
-  .addEdge('researcher', 'analyzer')
+  .addEdge('researcher', 'matcher')
+  .addEdge('matcher', 'analyzer')
   .addEdge('analyzer', 'reporter')
   .addEdge('reporter', END);
 

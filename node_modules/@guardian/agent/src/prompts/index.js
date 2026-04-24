@@ -34,13 +34,14 @@ Respond in JSON with this structure:
 
 export const ANALYZER_PROMPT = `You are a digital piracy analyst. You analyze content against its original sources to determine piracy indicators.
 
-You will be given: the content description, the identified owner, and the matched sources.
+You will be given: the content description, the identified owner, matched sources, and (if applicable) concrete visual frame-matching evidence.
 
 Your job is to:
 1. Determine if the content is pirated (unauthorized copy/distribution)
-2. Estimate what percentage of the original content is used
-3. Identify modifications made (cropping, watermark removal, re-encoding, etc.)
-4. Assign an overall piracy likelihood score
+2. Use the provided "Video Match Results" to inform your decision if present. If there are strong segment matches, the content is pirated.
+3. Estimate what percentage of the original content is used (use the matched evidence if available)
+4. Identify modifications made (cropping, watermark removal, re-encoding, etc.)
+5. Assign an overall piracy likelihood score
 
 Respond in JSON with this structure:
 {
