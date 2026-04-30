@@ -11,8 +11,11 @@ const handleScanController = async (req, res) => {
 
     return res.status(httpStatus).json({
       success: result.ok,
-      message: publicMessage.replace("{{field}}", "link").replace("{{resource}}", "Scan report"),
+      message: publicMessage
+        .replace("{{field}}", "link")
+        .replace("{{resource}}", "Scan report"),
       data: result.data,
+      ...(result.warnings && { warnings: result.warnings }),
     });
   } catch (err) {
     console.error("[ScanController] Unhandled:", err);

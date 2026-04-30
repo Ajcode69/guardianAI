@@ -8,6 +8,8 @@ import { Annotation } from '@langchain/langgraph';
 export const AgentState = Annotation.Root({
   // Input
   link: Annotation({ reducer: (_, b) => b, default: () => '' }),
+  country: Annotation({ reducer: (_, b) => b, default: () => '' }),
+  contentHints: Annotation({ reducer: (_, b) => b, default: () => ({}) }),
 
   // Traverser outputs
   contentDescription: Annotation({ reducer: (_, b) => b, default: () => '' }),
@@ -21,9 +23,13 @@ export const AgentState = Annotation.Root({
   ownerConfidence: Annotation({ reducer: (_, b) => b, default: () => 0 }),
   originalSources: Annotation({ reducer: (_, b) => b, default: () => [] }),
 
-  // Matcher outputs
-  matchResults: Annotation({ reducer: (_, b) => b, default: () => [] }),
+  // Matcher outputs — separate channels per signal type
+  videoMatchResults: Annotation({ reducer: (_, b) => b, default: () => [] }),
+  audioMatchResults: Annotation({ reducer: (_, b) => b, default: () => [] }),
+  contentMatchResults: Annotation({ reducer: (_, b) => b, default: () => [] }),
   hasVideoMatch: Annotation({ reducer: (_, b) => b, default: () => false }),
+  hasAudioMatch: Annotation({ reducer: (_, b) => b, default: () => false }),
+  hasContentMatch: Annotation({ reducer: (_, b) => b, default: () => false }),
 
   // Analyzer outputs
   isPirated: Annotation({ reducer: (_, b) => b, default: () => false }),
@@ -31,6 +37,9 @@ export const AgentState = Annotation.Root({
   percentageUsed: Annotation({ reducer: (_, b) => b, default: () => 0 }),
   modifications: Annotation({ reducer: (_, b) => b, default: () => [] }),
   analysisReasoning: Annotation({ reducer: (_, b) => b, default: () => '' }),
+
+  // Legal analysis outputs
+  jurisdictionAnalysis: Annotation({ reducer: (_, b) => b, default: () => null }),
 
   // Reporter output (final)
   report: Annotation({ reducer: (_, b) => b, default: () => null }),

@@ -23,7 +23,7 @@ class CompareResponse(BaseModel):
     originalDuration: float
     percentageMatched: float
 
-@router.post("/compare", response_model=CompareResponse)
+@router.post("/compare/video", response_model=CompareResponse)
 def compare_videos(req: CompareRequest):
     tmp_a, tmp_b = None, None
     try:

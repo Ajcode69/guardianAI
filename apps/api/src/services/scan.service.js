@@ -17,7 +17,14 @@ const analyzeLinkService = async (body) => {
 
   try {
     console.log(`[ScanService] Analyzing: ${body.link}`);
-    const result = await guardianAgent.invoke({ link: body.link });
+    if (body.country) console.log(`[ScanService] Jurisdiction: ${body.country}`);
+
+    const result = await guardianAgent.invoke({
+      link: body.link,
+      country: body.country || '',
+      contentHints: body.contentHints || {},
+    });
+
     const report = result.report;
 
     if (!report) {
@@ -30,7 +37,21 @@ const analyzeLinkService = async (body) => {
       };
     }
 
-    console.log(`[ScanService] Done — pirated: ${report?.piracy?.isPirated}`);
+    // Collect non-fatal warnings from the analysis
+    const warnings = [];
+
+    if (report.matching?.audio?.hasMatch === false && body.link) {
+      // Only warn if we expected audio matching (video content)
+      if (report.asset?.contentType === 'video' && !report.matching?.audio?.summary?.includes('performed')) {
+        warnings.push(CODE_META[CODES.AUDIO_MATCH_FAILED].publicMessage);
+      }
+    }
+
+    if (report.jurisdictionAnalysis?.skipped) {
+      warnings.push(CODE_META[CODES.LEGAL_ANALYSIS_UNAVAILABLE].publicMessage);
+    }
+
+    console.log(`[ScanService] Done — pirated: ${report?.copyrightAssessment?.isPirated}`);
 
     const { internalMessage } = CODE_META[CODES.SUCCESS];
     return {
@@ -38,6 +59,7 @@ const analyzeLinkService = async (body) => {
       code: CODES.SUCCESS,
       message: internalMessage.replace("{{resource}}", "Scan report"),
       data: report,
+      ...(warnings.length > 0 && { warnings }),
     };
   } catch (err) {
     console.error("[ScanService] Error:", err);

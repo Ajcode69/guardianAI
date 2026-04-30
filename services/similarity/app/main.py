@@ -2,10 +2,12 @@ from fastapi import FastAPI
 import uvicorn
 from app.config import HOST, PORT
 from app.routes import compare
+from app.routes import compare_audio
 
 app = FastAPI(title="Guardian Similarity Service")
 
 app.include_router(compare.router)
+app.include_router(compare_audio.router)
 
 @app.get("/health")
 def health_check():

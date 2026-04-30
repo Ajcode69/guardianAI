@@ -59,6 +59,9 @@ const CODES = Object.freeze({
   SCAN_FAILED:           "SCAN_FAILED",
   AGENT_UNAVAILABLE:     "AGENT_UNAVAILABLE",
   REPORT_EMPTY:          "REPORT_EMPTY",
+  AUDIO_MATCH_FAILED:    "AUDIO_MATCH_FAILED",
+  LEGAL_ANALYSIS_UNAVAILABLE: "LEGAL_ANALYSIS_UNAVAILABLE",
+  INVALID_COUNTRY_CODE:  "INVALID_COUNTRY_CODE",
 });
 
 
@@ -225,6 +228,21 @@ const CODE_META = Object.freeze({
     httpStatus: 200,
     publicMessage: "Scan completed but produced no report.",
     internalMessage: "Agent returned result but result.report was null/undefined",
+  },
+  [CODES.AUDIO_MATCH_FAILED]: {
+    httpStatus: 200,
+    publicMessage: "Audio analysis could not be completed. Visual analysis was still performed.",
+    internalMessage: "Audio fingerprinting/comparison threw or returned no data",
+  },
+  [CODES.LEGAL_ANALYSIS_UNAVAILABLE]: {
+    httpStatus: 200,
+    publicMessage: "Legal jurisdiction analysis could not be completed.",
+    internalMessage: "Legal analyzer node failed — country may be missing or search returned no results",
+  },
+  [CODES.INVALID_COUNTRY_CODE]: {
+    httpStatus: 400,
+    publicMessage: "Invalid country code. Please provide a valid ISO 3166-1 alpha-2 code.",
+    internalMessage: "req.body.country was not a valid 2-letter ISO code",
   },
 });
 

@@ -80,7 +80,7 @@ export async function compareVideos(suspectUrl, originalUrl) {
   await ensureServerRunning();
 
   try {
-    const res = await axios.post(`http://${SIMILARITY_HOST}:${SIMILARITY_PORT}/compare`, {
+    const res = await axios.post(`http://${SIMILARITY_HOST}:${SIMILARITY_PORT}/compare/video`, {
       suspect_url: suspectUrl,
       original_url: originalUrl,
       threshold: 0.80
